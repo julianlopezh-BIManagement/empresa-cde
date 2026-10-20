@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDE Empresa - Luzma 1 & 2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar: Google Drive Integration & Folder Tree Explorer -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">SP</div>
+        <div class="brand-info">
+          <h1>Empresa</h1>
+          <p>Entorno Común de Datos (CDE)</p>
+        </div>
+      </div>
+      
+      <!-- Quick link to 3D Mindmap Navigator -->
+      <div style="padding: 0 16px 12px 16px;">
+        <a href="mindmap.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #0284c7, #2563eb); color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 6px rgba(37,99,235,0.4);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+          🧠 Abrir Mapas Mentales 3D
+        </a>
+      </div>
+      
+      <!-- Google Drive Connection Status Card -->
+      <div class="gdrive-status">
+        <div class="gdrive-status-header">
+          <span>
+            <span class="status-dot"></span>Backend: Google Drive
+          </span>
+          <span class="text-success" style="font-weight: bold; font-size: 10px;">CONECTADO</span>
+        </div>
+        <div class="storage-bar-bg">
+          <div class="storage-bar-fill" id="storageBarFill"></div>
+        </div>
+        <div class="storage-text">
+          <span id="storageUsedText">1.2 GB usados</span>
+          <span>15 GB total</span>
+        </div>
+      </div>
+      
+      <!-- Folders Explorer -->
+      <div class="explorer-section">
+        <h2 class="explorer-title">Navegación del Directorio</h2>
+        
+        <!-- Folder Tree Root -->
+        <div class="tree-node">
+          <div class="tree-header" id="rootFolderNode">
+            <span class="tree-icon">
+              <!-- Folder icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+            </span>
+            <span style="font-family: monospace; font-weight: 600;">GE_SPI_0001</span>
+            <span class="tree-badge badge-root">N1</span>
+          </div>
+          
+          <div class="tree-children expanded" id="rootChildren">
+            <!-- Level 2: Contract -->
+            <div class="tree-node">
+              <div class="tree-header" id="contractFolderNode">
+                <span class="tree-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+                </span>
+                <span style="font-family: monospace; font-weight: 600;">SPI_2026_001</span>
+                <span class="tree-badge badge-contract">N2</span>
+              </div>
+              
+              <div class="tree-children expanded" id="contractChildren">
+                
+                <!-- Level 3: Folder 1T -->
+                <div class="tree-node">
+                  <div class="tree-header folder-nav-btn active" data-state="1T" id="folderNode-1T">
+                    <span class="tree-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </span>
+                    <span style="font-family: monospace;">1T_Trabajo_Progreso</span>
+                    <span class="tree-badge badge-state">1T</span>
+                  </div>
+                </div>
+                
+                <!-- Level 3: Folder 2C -->
+                <div class="tree-node">
+                  <div class="tree-header folder-nav-btn" data-state="2C" id="folderNode-2C">
+                    <span class="tree-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </span>
+                    <span style="font-family: monospace;">2C_Compartido</span>
+                    <span class="tree-badge badge-state">2C</span>
+                  </div>
+                </div>
+                
+                <!-- Level 3: Folder 3P -->
+                <div class="tree-node">
+                  <div class="tree-header folder-nav-btn" data-state="3P" id="folderNode-3P">
+                    <span class="tree-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </span>
+                    <span style="font-family: monospace;">3P_Publicado</span>
+                    <span class="tree-badge badge-state">3P</span>
+                  </div>
+                </div>
+                
+                <!-- Level 3: Folder 4A -->
+                <div class="tree-node">
+                  <div class="tree-header folder-nav-btn" data-state="4A" id="folderNode-4A">
+                    <span class="tree-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </span>
+                    <span style="font-family: monospace;">4A_Archivado</span>
+                    <span class="tree-badge badge-state">4A</span>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Panel: File view, details, actions -->
+    <main class="main-content">
+      
+      <!-- Top Action Bar -->
+      <header class="top-bar">
+        <div class="path-breadcrumbs">
+          <span class="breadcrumb-item">GE_SPI_0001</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item">SPI_2026_001</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item active" id="activeBreadcrumb">1T_Trabajo_Progreso</span>
+        </div>
+        <div class="top-bar-actions">
+          <button class="btn btn-secondary" id="btnCleanStorage" title="Reinicia la base de datos a sus valores iniciales de prueba">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
+            Reiniciar CDE
+          </button>
+        </div>
+      </header>
+      
+      <!-- Main Workspace Split Panel -->
+      <div class="workspace-grid" id="workspaceGrid">
+        
+        <!-- Left: Document List / Browser -->
+        <section class="browser-panel">
+          <div class="panel-header">
+            <h2 class="panel-title" id="activeFolderTitle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent);"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              Trabajo en Progreso (1T)
+            </h2>
+            <p class="panel-desc">Documentos cargados bajo el contrato SPI_2026_001 en estado de borrador u operación en progreso.</p>
+          </div>
+          
+          <!-- Empty State (Hidden when items present) -->
+          <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            </div>
+            <h3 class="empty-state-title">No hay archivos en esta carpeta</h3>
+            <p class="empty-state-desc">Usa el formulario de la derecha para configurar y cargar un nuevo documento bajo la nomenclatura oficial.</p>
+          </div>
+          
+          <!-- Table of Files -->
+          <div class="files-container" id="filesContainer">
+            <table class="files-table">
+              <thead>
+                <tr>
+                  <th>Nombre en el CDE (Nivel 4)</th>
+                  <th>Tipo</th>
+                  <th>Especialidad</th>
+                  <th>Versión</th>
+                  <th style="width: 100px; text-align: right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="filesTableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
+        <!-- Right: Upload Form & Realtime Naming Preview -->
+        <section class="upload-panel">
+          <div>
+            <h3 class="section-subtitle">Paso 1: Destino del Documento</h3>
+            <div class="folder-tabs" id="folderTabs">
+              <div class="folder-tab active" data-state="1T">1T</div>
+              <div class="folder-tab" data-state="2C">2C</div>
+              <div class="folder-tab" data-state="3P">3P</div>
+              <div class="folder-tab" data-state="4A">4A</div>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="section-subtitle">Paso 2: Nomenclatura del Archivo</h3>
+            <form id="namingForm" autocomplete="off" onsubmit="event.preventDefault();">
+              
+              <!-- ID Proyecto (Prefilled, disabled) -->
+              <div class="form-group">
+                <label class="form-label" for="projId">
+                  <span>ID Proyecto</span>
+                  <span class="text-warning" style="font-size: 10px;">FIJO</span>
+                </label>
+                <div class="form-control-container">
+                  <input type="text" id="projId" class="form-input" value="GE_SPI_0001" disabled>
+                  <div class="guidance-tip">
+                    <strong>Código de Proyecto:</strong> Identifica el modo de generación (GE), la entidad (SPI) y el consecutivo (0001). Siempre es GE_SPI_0001 para este proyecto.
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Fase (Prefilled, disabled) -->
+              <div class="form-group">
+                <label class="form-label" for="phaseId">
+                  <span>Fase</span>
+                  <span class="text-warning" style="font-size: 10px;">FIJO</span>
+                </label>
+                <div class="form-control-container">
+                  <input type="text" id="phaseId" class="form-input" value="F8" disabled>
+                  <div class="guidance-tip">
+                    <strong>Fase del Ciclo de Vida:</strong> Se establece como F8 debido a que las centrales se encuentran en fase de Operación y Mantenimiento.
+                  </div>
+                </div>
+              </div>
+              
+              <!-- División (Required dropdown) -->
+              <div class="form-group">
+                <label class="form-label" for="divisionSelect">
+                  <span>División *</span>
+                  <span class="text-danger" style="font-size: 10px;">OBLIGATORIO</span>
+                </label>
+                <div class="form-control-container">
+                  <select id="divisionSelect" class="form-select" required>
+                    <option value="" disabled selected>Selecciona División</option>
+                    <option value="LZ001">Luzma 1 (LZ001)</option>
+                    <option value="LZ002">Luzma 2 (LZ002)</option>
+                  </select>
+                  <div class="guidance-tip">
+                    <strong>División Técnica:</strong> Elige entre Luzma 1 (LZ001) y Luzma 2 (LZ002) para asociar el documento a la central correspondiente.
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Localización (Conditional dropdown) -->
+              <div class="form-group">
+                <label class="form-label" for="locationSelect">
+                  <span>Localización *</span>
+                  <span class="text-warning" style="font-size: 10px;" id="locationStatusLabel">CONDICIONADO</span>
+                </label>
+                <div class="form-control-container">
+                  <select id="locationSelect" class="form-select" disabled required>
+                    <option value="" disabled selected>Selecciona primero una división</option>
+                  </select>
+                  <div class="guidance-tip" id="locationGuidanceTip">
+                    <strong>Localización Física:</strong> Opciones filtradas según la división elegida. Define la infraestructura donde aplica el documento.
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Especialidad (Required dropdown) -->
+              <div class="form-group">
+                <label class="form-label" for="specialtySelect">
+                  <span>Especialidad *</span>
+                  <span class="text-danger" style="font-size: 10px;">OBLIGATORIO</span>
+                </label>
+                <div class="form-control-container">
+                  <select id="specialtySelect" class="form-select" required>
+                    <option value="" disabled selected>Selecciona Especialidad</option>
+                    <option value="MEC">Mecánica (MEC)</option>
+                    <option value="CIV">Civiles (CIV)</option>
+                    <option value="ELE">Eléctrica (ELE)</option>
+                    <option value="AMB">Ambiental (AMB)</option>
+                  </select>
+                  <div class="guidance-tip">
+                    <strong>Especialidad Técnica:</strong> Indica el área de ingeniería a la que pertenece el entregable (Mecánica, Civil, Eléctrica o Ambiental).
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Tipo de Documento (Required dropdown) -->
+              <div class="form-group">
+                <label class="form-label" for="docTypeSelect">
+                  <span>Tipo de Documento *</span>
+                  <span class="text-danger" style="font-size: 10px;">OBLIGATORIO</span>
+                </label>
+                <div class="form-control-container">
+                  <select id="docTypeSelect" class="form-select" required>
+                    <option value="" disabled selected>Selecciona Tipo de Doc.</option>
+                    <option value="MAN">Manual (MAN)</option>
+                    <option value="PLA">Plano (PLA)</option>
+                    <option value="M3D">Modelo 3D (M3D)</option>
+                  </select>
+                  <div class="guidance-tip">
+                    <strong>Tipo de Entregable:</strong> Define la tipología física o digital del archivo (Ej. Manual, Plano, Modelo 3D).
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Consecutivo (Autogenerated indicator) -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span>Consecutivo</span>
+                  <span class="text-success" style="font-size: 10px; font-weight: bold;">AUTOGENERADO</span>
+                </label>
+                <div class="form-control-container">
+                  <input type="text" id="consecutivoInput" class="form-input" style="font-family: monospace; font-weight: bold; background-color: #f1f5f9;" value="----" disabled>
+                  <div class="guidance-tip">
+                    <strong>Consecutivo del Documento:</strong> Autocalculado numéricamente de 4 dígitos (ej: 0001, 0002) para evitar duplicados en la misma ruta y tipo.
+                  </div>
+                </div>
+              </div>
+              
+            </form>
+          </div>
+          
+          <div>
+            <h3 class="section-subtitle">Paso 3: Metadatos Adicionales</h3>
+            
+            <!-- Descripción (Input text) -->
+            <div class="form-group">
+              <label class="form-label" for="descInput">
+                <span>Descripción (Metadato Externo) *</span>
+                <span class="text-secondary" style="font-size: 10px;" id="descCharCount">0/20</span>
+              </label>
+              <div class="form-control-container">
+                <input type="text" id="descInput" class="form-input" placeholder="Ej: OBRAS CIVILES REJAS" maxlength="20" required>
+                <div class="guidance-tip">
+                  <strong>Descripción del Entregable:</strong> Máximo 20 caracteres. No se permiten caracteres especiales. Al descargar, se concatenará al nombre.
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Naming Sandbox Live Preview Card -->
+          <div class="sandbox-card">
+            <div class="sandbox-title">
+              <span>Sandbox de Nomenclatura</span>
+              <span id="previewLengthBadge" class="tree-badge badge-root">0 / 33 Caracteres Base</span>
+            </div>
+            
+            <div class="sandbox-field">
+              <span class="sandbox-label">Visualización en el CDE (Nivel 4)</span>
+              <div class="sandbox-value cde-active-name" id="cdeNamePreview">GE_SPI_0001_F8_XXXXX_XXXXX_XXX_XXX_XXXX</div>
+            </div>
+            
+            <div class="sandbox-field">
+              <span class="sandbox-label">Nombre de Exportación (Descarga Externa)</span>
+              <div class="sandbox-value download-active-name" id="downloadNamePreview">GE_SPI_0001_F8_XXXXX_XXXXX_XXX_XXX_XXXX_[DESC]_V[VER].[EXT]</div>
+            </div>
+          </div>
+          
+          <!-- Mock Drag and Drop Upload Area -->
+          <div>
+            <input type="file" id="realFileInput" style="display: none;">
+            <div class="uploader-area" id="dropArea">
+              <span class="uploader-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              </span>
+              <div class="uploader-text" id="uploaderText">Arrastra un archivo aquí o haz click para explorar</div>
+              <div class="uploader-subtext">Se mantendrá la extensión original del archivo</div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <button class="btn btn-primary" id="btnUpload" disabled style="width: 100%; padding: 14px; font-size: 14px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Cargar y Sincronizar en CDE
+          </button>
+          
+        </section>
+        
+      </div>
+    </main>
+    
+  </div>
+  
+  <!-- File Detail Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Detalles del Documento CDE</h3>
+        <button class="modal-close" id="btnModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="metadata-grid">
+          
+          <div class="metadata-label">Estado CDE:</div>
+          <div class="metadata-value" id="mdState">---</div>
+          
+          <div class="metadata-label">Nombre Base (CDE):</div>
+          <div class="metadata-value monospace" id="mdCdeName">---</div>
+          
+          <div class="metadata-label">Proyecto:</div>
+          <div class="metadata-value" id="mdProject">GE_SPI_0001</div>
+          
+          <div class="metadata-label">Fase:</div>
+          <div class="metadata-value" id="mdPhase">F8</div>
+          
+          <div class="metadata-label">División:</div>
+          <div class="metadata-value" id="mdDivision">---</div>
+          
+          <div class="metadata-label">Localización:</div>
+          <div class="metadata-value" id="mdLocation">---</div>
+          
+          <div class="metadata-label">Especialidad:</div>
+          <div class="metadata-value" id="mdSpecialty">---</div>
+          
+          <div class="metadata-label">Tipo Documento:</div>
+          <div class="metadata-value" id="mdDocType">---</div>
+          
+          <div class="metadata-label">Consecutivo:</div>
+          <div class="metadata-value monospace" id="mdConsecutivo">---</div>
+          
+          <div class="metadata-label">Descripción:</div>
+          <div class="metadata-value" id="mdDesc" style="font-weight: 600;">---</div>
+          
+          <div class="metadata-label">Versión Interna:</div>
+          <div class="metadata-value" id="mdVersion">---</div>
+          
+          <div class="metadata-label">Nombre de Descarga:</div>
+          <div class="metadata-value monospace" id="mdDownloadName" style="color: var(--color-accent-hover); font-size: 11px; word-break: break-all;">---</div>
+          
+          <div class="metadata-label">Fecha de Carga:</div>
+          <div class="metadata-value" id="mdDate">---</div>
+          
+          <div class="metadata-label">Sincronización GDrive:</div>
+          <div class="metadata-value text-success" id="mdSync">Sincronizado</div>
+          
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnModalClose2">Cerrar</button>
+        <button class="btn btn-primary" id="btnModalDownload">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Descargar (Con Metadatos)
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

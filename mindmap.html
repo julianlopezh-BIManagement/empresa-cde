@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Mind Mapping & WBS (Modo Claro)</title>
+  <link rel="stylesheet" href="mindmap.css">
+  
+  <!-- CDN Dependencies: Three.js, OrbitControls, Tween.js, SheetJS (Excel), Marked (Markdown), Tesseract.js (OCR) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- TOP TOOLBAR / HEADER -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">SP 3D</div>
+        <div class="brand-title">
+          <h1>
+            <span>Grafo & Mapa Mental</span>
+            <input type="text" id="projectTitleInput" class="project-title-input" value="Organigrama & EDT General SP" title="Haz clic para editar el nombre del proyecto">
+          </h1>
+          <span>Empresa &bull; Visualizador Espacial EDT (Modo Claro)</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Project Actions -->
+        <div class="btn-group">
+          <button id="btnNewProject" class="btn" title="Crear un nuevo mapa en blanco">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Nuevo
+          </button>
+          <button id="btnLoadProject" class="btn" title="Cargar archivo de proyecto .mindmap.json / .json">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Abrir
+          </button>
+          <button id="btnSaveProject" class="btn btn-primary" title="Guardar con selección de ubicación y nombre de archivo (*.mindmap.json)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar Como...
+          </button>
+        </div>
+
+        <!-- Ingestion & Export Actions (Excel & Image) -->
+        <div class="btn-group">
+          <button id="btnOpenExcelModal" class="btn btn-accent" title="Cargar archivo Excel con categorías y jerarquías EDT">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            📥 Importar Excel
+          </button>
+          <button id="btnOpenImageModal" class="btn" style="background: linear-gradient(135deg, #7c3aed, #9333ea); border-color: #9333ea; color: #ffffff;" title="Generar mapa mental y EDT a partir de una imagen, organigrama o diagrama">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            🖼️ Ingesta Imagen
+          </button>
+          <button id="btnExportExcel" class="btn" title="Exportar estructura EDT a Excel (.xlsx)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            📤 Exportar Excel (.xlsx)
+          </button>
+        </div>
+
+        <!-- 3D Layout Switchers (Reinstated: Radial 3D & Grafo de Fuerzas) -->
+        <div class="btn-group">
+          <button id="btnLayoutRadial" class="btn active" title="Disposición Radial 3D (Vista por Defecto)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+            Radial 3D
+          </button>
+          <button id="btnLayoutForce" class="btn" title="Grafo de Fuerzas Dinámico 3D">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Grafo Fuerzas
+          </button>
+        </div>
+
+        <!-- Panels Visibility Toggles & Full Workspace Mode -->
+        <div class="btn-group">
+          <button id="btnToggleLeftPanel" class="btn active" title="Mostrar / Ocultar Jerarquía 2D">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            Jerarquía 2D
+          </button>
+          <button id="btnToggleRightPanel" class="btn active" title="Mostrar / Ocultar Inspector">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="15" x2="15" y2="21"/></svg>
+            Inspector
+          </button>
+          <button id="btnTogglePanels" class="btn" title="Ocultar ambos paneles laterales para maximizar visualización 3D y visor dividido">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            ⛶ Maximizar
+          </button>
+        </div>
+
+        <!-- Auto-Save Status Indicator (Every 1 minute) -->
+        <div class="autosave-indicator" id="autoSaveIndicator" title="Guardado automático activo cada minuto">
+          <span class="autosave-dot"></span>
+          <span id="autoSaveStatusText">Autoguardado (1m)</span>
+        </div>
+
+        <!-- Zoom Fit All Button -->
+        <button id="btnZoomFitAll" class="btn" title="Abarcar todo el mapa en el lienzo 3D en un solo paso (Zoom Extents)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          🔍 Zoom Todo
+        </button>
+
+        <!-- Navigation Link to CDE Document Explorer -->
+        <a href="index.html" class="btn" title="Ir al Gestor Documental CDE">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>
+          📁 CDE Archivos
+        </a>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="main-workspace">
+      
+      <!-- LEFT PANEL: 2D HIERARCHY / EDT TABLE (Image 1 Replica) -->
+      <aside class="left-panel" id="leftPanel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Jerarquía 2D / EDT
+          </div>
+          <div class="panel-controls">
+            <button id="btnExpandAll" class="btn btn-icon" title="Expandir todo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+            </button>
+            <button id="btnCollapseAll" class="btn btn-icon" title="Colapsar todo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            </button>
+            <button id="btnAddNewRootNode" class="btn btn-icon btn-primary" title="Agregar Rama Principal EDT">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button id="btnCollapseLeftPanel" class="btn btn-icon" title="Ocultar panel 2D (◀)" style="margin-left: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search and Level Filter Bar -->
+        <div class="search-bar-container">
+          <div class="search-input-wrapper">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar actividad, código EDT o responsable...">
+          </div>
+          <div class="filter-tags">
+            <span class="filter-pill active" data-level="all">Todos los niveles</span>
+            <span class="filter-pill" data-level="0">Nivel 1 (Gerencias)</span>
+            <span class="filter-pill" data-level="1">Nivel 2 (Direcciones)</span>
+            <span class="filter-pill" data-level="2">Nivel 3 (Actividades)</span>
+          </div>
+
+          <!-- Excel Outline Toolbar (Agrupar / Esquema Excel 1, 2, 3, Todo) -->
+          <div class="excel-outline-toolbar">
+            <div class="excel-outline-left">
+              <span class="excel-outline-label">Esquema:</span>
+              <div class="excel-outline-btn-group">
+                <button class="excel-level-btn" id="btnOutlineLevel1" title="Nivel 1: Colapsar a Gerencias (solo Nivel 0)">1</button>
+                <button class="excel-level-btn" id="btnOutlineLevel2" title="Nivel 2: Mostrar Direcciones (Nivel 0 y 1)">2</button>
+                <button class="excel-level-btn" id="btnOutlineLevel3" title="Nivel 3: Mostrar Actividades (Nivel 0, 1 y 2)">3</button>
+                <button class="excel-level-btn active" id="btnOutlineLevelAll" title="Expandir Todos los grupos y niveles">Todo</button>
+              </div>
+            </div>
+            <span class="excel-collapsed-counter" id="excelCollapsedCounter">0 colapsados</span>
+          </div>
+        </div>
+
+        <!-- EDT Dynamic Table Container (Image 1 Style) -->
+        <div class="edt-container" id="edtContainer">
+          <table class="edt-table" id="edtTable">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Código EDT</th>
+                <th>Áreas de trabajo / Actividades</th>
+                <th style="width: 50px; text-align: center;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="edtTableBody">
+              <!-- Dynamically populated rows matching Image 1 -->
+            </tbody>
+          </table>
+        </div>
+      </aside>
+
+      <!-- CENTER PANEL: 3D INTERACTIVE CANVAS & SPLIT VIEWER (LIGHT MODE) -->
+      <section class="center-panel">
+        <!-- Floating Expand Pills when side panels are collapsed -->
+        <button id="floatingExpandLeft" class="floating-panel-toggle left" title="Mostrar Jerarquía 2D (Panel Izquierdo)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          Jerarquía 2D
+        </button>
+        <button id="floatingExpandRight" class="floating-panel-toggle right" title="Mostrar Inspector (Panel Derecho)">
+          Inspector
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <div class="split-workspace-wrapper">
+          <div id="canvas3d-container"></div>
+
+          <!-- SPLIT WINDOW VIEWER FOR LOCAL ATTACHMENTS (.pdf, .xlsx, .doc, .ifc, folders) -->
+          <div class="split-viewer-panel" id="splitViewerPanel">
+            <!-- Resizer Handle for custom split panel width -->
+            <div class="split-resizer" id="splitResizer" title="Arrastrar para ajustar el ancho de la ventana dividida"></div>
+
+            <div class="split-viewer-header">
+              <div class="split-viewer-title">
+                <span id="splitFileIcon">📄</span>
+                <span id="splitFileName">Documento.pdf</span>
+                <span id="splitFileTypeBadge" class="split-viewer-badge">PDF</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btnSplitBackToFolder" class="btn" style="display: none; font-size: 11px; padding: 2px 8px; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;" title="Regresar al navegador de archivos de la carpeta">⬅ Volver a Carpeta</button>
+                <button id="btnSplitDownload" class="btn btn-icon" title="Descargar / Guardar archivo">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                </button>
+                <button id="btnCloseSplitViewer" class="btn btn-icon" title="Cerrar visor dividido (✕)" style="font-weight: bold; font-size: 13px;">✕</button>
+              </div>
+            </div>
+            <div class="split-viewer-body" id="splitViewerBody">
+              <!-- Dynamically populated iframe (PDF), table (Excel), folder explorer, or IFC 3D viewer -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Info Overlay -->
+        <div class="canvas-info-overlay">
+          <span>Nodos: <b id="statTotalNodes">0</b></span>
+          <span>Enlaces: <b id="statTotalEdges">0</b></span>
+          <span>Nodo Activo: <b id="statActiveNode">Ninguno</b></span>
+          <span>Navegación: <i>Clic izq: rotar &bull; Clic der: desplazar &bull; Rueda: zoom</i></span>
+        </div>
+      </section>
+
+      <!-- RIGHT PANEL: INSPECTOR, OBSIDIAN NOTES & ATTACHMENTS (LIGHT MODE) -->
+      <aside class="right-panel" id="rightPanel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Inspector & Notas Obsidian
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button id="btnSaveNodeChanges" class="btn btn-primary btn-icon" title="Guardar cambios del nodo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button id="btnCollapseRightPanel" class="btn btn-icon" title="Ocultar inspector (▶)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="inspector-body" id="inspectorBody">
+          <!-- Default State: No node selected -->
+          <div id="inspectorEmptyState" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <p style="font-size: 13px; font-weight: 600;">Selecciona un nodo en el panel 2D o en el canvas 3D para editar sus propiedades, notas en Markdown, hipervínculos de sub-mapas y adjuntos.</p>
+          </div>
+
+          <!-- Active State: Form Editor -->
+          <div id="inspectorForm" style="display: none; flex-direction: column; gap: 14px;">
+            
+            <!-- Metadata Card -->
+            <div class="inspector-card">
+              <div class="card-title">
+                <span>Propiedades del Nodo EDT</span>
+                <span id="nodeBadgeLevel" class="filter-pill" style="margin: 0;">Nivel 0</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Código Jerárquico / EDT:</label>
+                <input type="text" id="nodeCodeInput" class="form-input" placeholder="ej. 01.01.01">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nombre / Actividad / Cargo:</label>
+                <input type="text" id="nodeTitleInput" class="form-input" placeholder="ej. Licitaciones">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Responsable / Encargado:</label>
+                <input type="text" id="nodeOwnerInput" class="form-input" placeholder="ej. Edwin Peña">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nodo Padre (Superior):</label>
+                <select id="nodeParentSelect" class="form-select">
+                  <option value="">(Ninguno - Raíz Principal)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Visual Style Card -->
+            <div class="inspector-card">
+              <div class="card-title">Personalización Gráfica 3D</div>
+              
+              <div class="form-group">
+                <label class="form-label">Color del Nodo:</label>
+                <div class="color-picker-grid" id="colorPickerGrid">
+                  <div class="color-swatch" style="background-color: #000000;" data-color="#000000" title="Negro (Nivel 1)"></div>
+                  <div class="color-swatch" style="background-color: #0369a1;" data-color="#0369a1" title="Azul Marino"></div>
+                  <div class="color-swatch" style="background-color: #0284c7;" data-color="#0284c7" title="Azul SP"></div>
+                  <div class="color-swatch" style="background-color: #38bdf8;" data-color="#38bdf8" title="Cyan"></div>
+                  <div class="color-swatch" style="background-color: #dc2626;" data-color="#dc2626" title="Rojo Licitaciones"></div>
+                  <div class="color-swatch" style="background-color: #fecdd3;" data-color="#fecdd3" title="Salmón Peaje"></div>
+                  <div class="color-swatch" style="background-color: #16a34a;" data-color="#16a34a" title="Verde Sostenibilidad"></div>
+                  <div class="color-swatch" style="background-color: #ea580c;" data-color="#ea580c" title="Naranja Jurídico"></div>
+                  <div class="color-swatch" style="background-color: #eab308;" data-color="#eab308" title="Amarillo Financiero"></div>
+                  <div class="color-swatch" style="background-color: #8b5cf6;" data-color="#8b5cf6" title="Púrpura Transformación"></div>
+                  <div class="color-swatch" style="background-color: #64748b;" data-color="#64748b" title="Gris Neutro"></div>
+                  <div class="color-swatch" style="background-color: #ffffff; border: 1px solid #cbd5e1;" data-color="#ffffff" title="Blanco"></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tipo de Relación con el Padre:</label>
+                <select id="nodeRelationSelect" class="form-select">
+                  <option value="solid">Línea Sólida (Mando / Jerarquía Directa)</option>
+                  <option value="dotted">Línea Punteada (Asesoría / Staff / Auditoría)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Forma 3D:</label>
+                <select id="nodeShapeSelect" class="form-select">
+                  <option value="box">Caja / Tarjeta 3D</option>
+                  <option value="sphere">Esfera</option>
+                  <option value="cylinder">Cilindro</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Obsidian Markdown Notes Card -->
+            <div class="inspector-card">
+              <div class="card-title">
+                <span>Notas en Markdown (Obsidian Hub)</span>
+                <div class="notes-tab-header">
+                  <button id="tabBtnEditNote" class="tab-btn active">Editar</button>
+                  <button id="tabBtnPreviewNote" class="tab-btn">Vista Previa</button>
+                </div>
+              </div>
+              
+              <div id="noteEditView">
+                <textarea id="nodeMarkdownInput" class="form-textarea" placeholder="Escribe notas con formato Markdown, listas de verificación, enlaces a otros nodos [[Código EDT]], etc..."></textarea>
+              </div>
+
+              <div id="notePreviewView" class="markdown-preview" style="display: none;"></div>
+            </div>
+
+            <!-- Tasks / Actividades Card -->
+            <div class="inspector-card">
+              <div class="card-title">
+                <span>📋 Tareas del Nodo EDT (<span id="taskCountBadge">0</span>)</span>
+                <button id="btnInspectorAddTask" class="btn btn-icon" title="Agregar nueva tarea a este nodo" style="color: #0d9488; background: #ccfbf1; border-color: #99f6e4;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              
+              <div class="tasks-list" id="inspectorTasksList">
+                <!-- Dynamically populated tasks -->
+              </div>
+            </div>
+
+            <!-- Attached Files & Sub-Map Links Card -->
+            <div class="inspector-card">
+              <div class="card-title">
+                <span>Archivos y Sub-Mapas EDT Vinculados</span>
+                <button id="btnAddAttachment" class="btn btn-icon" title="Vincular archivo o sub-mapa EDT (.mindmap.json)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+              </div>
+              
+              <div class="attachments-list" id="attachmentsList">
+                <!-- Dynamically populated attachments & sub-maps -->
+              </div>
+            </div>
+
+            <!-- Node Quick Actions -->
+            <button id="btnNodeToggleCollapse" class="btn" style="width: 100%; justify-content: center; background: #fef9c3; border-color: #ca8a04; color: #854d0e; font-weight: 700; display: none; margin-bottom: 8px;">
+              <span id="btnNodeToggleCollapseText">[-] Colapsar Rama (Agrupar)</span>
+            </button>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button id="btnNodeAddChild" class="btn btn-primary" style="flex: 1;">+ Dependencia EDT</button>
+              <button id="btnNodeDelete" class="btn" style="color: var(--accent-red); border-color: var(--accent-red);">Eliminar</button>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <!-- MODAL: EXCEL IMPORT & HIERARCHY ANALYSIS (Images 1 & 3) -->
+  <div class="modal-backdrop" id="excelModal">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <h2>📥 Ingesta y Análisis Jerárquico EDT desde Excel (.xlsx / .xls)</h2>
+        <button class="modal-close" id="btnCloseExcelModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-secondary);">
+          Sube una hoja de cálculo con códigos EDT (<code>01.01.01</code>) o matriz de carpetas multinivel (<code>Unidad Principal &gt; Subcarpeta 1 &gt; Subcarpeta 2 &gt; Documentos</code>).
+        </p>
+
+        <div class="dropzone" id="excelDropzone">
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+          <p><b>Arrastra tu archivo Excel aquí</b> o haz clic para examinar</p>
+          <span>Soporta formatos EDT y Matrices de Gestión Documental Empresa</span>
+        </div>
+
+        <!-- 2D Hierarchy Analysis & Proposed Structure Section -->
+        <div id="excelPreviewContainer" style="display: none; flex-direction: column; gap: 10px;">
+          <div id="excelMetadataHeader" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 11.5px; display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div><b>Empresa:</b> <span id="metaEmpresaVal" style="color: var(--accent-blue);">-</span></div>
+              <div><b>Dirección / Área:</b> <span id="metaDireccionVal" style="color: var(--accent-cyan);">-</span></div>
+              <div><b>Gerente / Director:</b> <span id="metaGerenteVal">-</span></div>
+              <div><b>Líder / Responsable:</b> <span id="metaLiderVal">-</span></div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 13px; font-weight: 700; color: var(--accent-blue);">Estructura Jerárquica 2D EDT Propuesta:</h3>
+            <span id="excelNodeCountBadge" class="filter-pill" style="background: var(--accent-blue); color: #ffffff; font-weight: 700;">0 Nodos</span>
+          </div>
+
+          <div class="hierarchy-tree-preview" id="excelHierarchyTreePreview">
+            <!-- Dynamically populated 2D interactive hierarchy tree -->
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="checkbox" id="chkExtractColors" checked>
+          <label for="chkExtractColors" style="font-size: 12px; color: var(--text-secondary); cursor: pointer;">
+            Aplicar paleta de colores jerárquica corporativa Empresa
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelExcelModal">Cancelar</button>
+        <button class="btn btn-accent" id="btnApplyExcelImport" disabled>✅ Confirmar Estructura EDT y Generar Mapa 3D</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: IMAGE IMPORT & OCR / DIAGRAM ANALYSIS -->
+  <div class="modal-backdrop" id="imageModal">
+    <div class="modal-card" style="max-width: 760px;">
+      <div class="modal-header">
+        <h2>🖼️ Ingesta y Generación EDT desde Imagen / Organigrama</h2>
+        <button class="modal-close" id="btnCloseImageModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-secondary);">
+          Sube una captura de pantalla, foto o archivo de imagen (<code>.png, .jpg, .webp</code>) de un organigrama, flujo de procesos o tabla EDT. El motor analizará la estructura visual y textos jerárquicos.
+        </p>
+
+        <!-- Dropzone / File Picker / Paste Area -->
+        <div class="dropzone" id="imageDropzone" style="border-color: #9333ea;">
+          <input type="file" id="imageFileInput" accept=".png, .jpg, .jpeg, .webp, .bmp, .svg" style="display: none;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p><b>Arrastra tu imagen aquí</b> o haz clic para examinar (También puedes pegar con <kbd style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:11px;">Ctrl+V</kbd>)</p>
+          <span>Detecta organigramas, diagramas de bloques, tablas y mapas conceptuales</span>
+        </div>
+
+        <!-- Image Scanning & Preview -->
+        <div id="imageAnalysisContainer" style="display: none; flex-direction: column; gap: 12px;">
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <!-- Left: Thumbnail Image Preview with scan bar -->
+            <div style="background: #0f172a; border-radius: 8px; padding: 8px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 200px; max-height: 260px;">
+              <img id="imagePreviewImg" src="" alt="Diagrama cargado" style="max-width: 100%; max-height: 240px; object-fit: contain; border-radius: 4px;">
+              <div id="imageScanLaser" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #a855f7; box-shadow: 0 0 12px #c084fc; display: none; animation: scanLaser 1.5s infinite alternate;"></div>
+            </div>
+
+            <!-- Right: Extraction Mode & Config -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="form-group">
+                <label class="form-label">Modo de Análisis Visual EDT:</label>
+                <select id="imageAnalysisModeSelect" class="form-select">
+                  <option value="auto" selected>🧠 Detección Inteligente Automática (Bocetos, Mapas y Tablas)</option>
+                  <option value="mindmap_sketch">🖍️ Mapa Mental / Boceto a Mano (Nodo Central & Ramas Radiales)</option>
+                  <option value="single_level">📋 Tabla EDT de Un Solo Nivel (Padre &gt; Lista A-Z)</option>
+                  <option value="organigram">🏢 Organigrama Corporativo (Presidencia &gt; Gerencias)</option>
+                  <option value="matrix">📂 Matriz Documental Multinivel (Carpetas &gt; Subcarpetas)</option>
+                  <option value="ocr_text">🔍 Extracción por Texto & Bloques Detectados</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Título General del Proyecto EDT:</label>
+                <input type="text" id="imageProjectTitleInput" class="form-input" placeholder="Nombre del proyecto detectado...">
+              </div>
+
+              <div id="imageOcrStatus" style="font-size: 11.5px; color: #7c3aed; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 8px; display: flex; align-items: center; gap: 8px;">
+                <span class="spinner" id="imageOcrSpinner" style="display: none;">⏳</span>
+                <span id="imageOcrStatusText">Listo para procesar estructura jerárquica.</span>
+              </div>
+
+              <button type="button" id="btnReanalyzeImage" class="btn" style="background:#f3e8ff; color:#7c3aed; border-color:#d8b4fe; font-size:11px; justify-content:center;">
+                🔄 Re-analizar Estructura Visual
+              </button>
+            </div>
+          </div>
+
+          <!-- Detected Hierarchy 2D Preview & Interactive Editor -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" id="tabBtnImgTree" class="btn active" style="font-size: 11px; padding: 3px 9px;">🌳 Jerarquía Detectada</button>
+                <button type="button" id="tabBtnImgText" class="btn" style="font-size: 11px; padding: 3px 9px;">✏️ Editor de Texto / Ramas</button>
+              </div>
+              <span id="imageNodeCountBadge" class="filter-pill" style="background: #9333ea; color: #ffffff; font-weight: 700;">0 Nodos</span>
+            </div>
+            
+            <div id="imageTreeTabContent">
+              <div class="hierarchy-tree-preview" id="imageHierarchyTreePreview" style="max-height: 190px;">
+                <!-- Dynamically populated 2D tree preview -->
+              </div>
+            </div>
+
+            <div id="imageTextTabContent" style="display: none;">
+              <textarea id="imageExtractedTextEditor" class="form-textarea" style="font-family: monospace; height: 180px; font-size: 12px; line-height: 1.5; white-space: pre; tab-size: 2;" placeholder="Nodo Principal\n  Rama 1\n    Sub-nodo 1.1\n  Rama 2..."></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                <span style="font-size: 10.5px; color: var(--text-muted);">💡 Usa 2 espacios o tabulaciones para definir niveles de jerarquía. Modificaciones en tiempo real.</span>
+                <button type="button" id="btnApplyTextEditor" class="btn" style="font-size: 10.5px; padding: 2px 8px; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Actualizar Vista Previa</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="checkbox" id="chkImageExtractColors" checked>
+          <label for="chkImageExtractColors" style="font-size: 12px; color: var(--text-secondary); cursor: pointer;">
+            Aplicar código de colores corporativos de niveles y gerencias Empresa
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelImageModal">Cancelar</button>
+        <button class="btn" id="btnApplyImageImport" style="background: linear-gradient(135deg, #7c3aed, #9333ea); color: #ffffff; border: none;" disabled>
+          ✅ Confirmar Estructura EDT y Generar Mapa 3D
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD ATTACHMENT / SUB-MAP DIALOG -->
+  <div class="modal-backdrop" id="attachmentModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>📎 Vincular Archivo Local o Sub-Mapa EDT al Nodo</h2>
+        <button class="modal-close" id="btnCloseAttachmentModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Local file and folder picker buttons -->
+        <div style="padding: 12px; background: rgba(2, 132, 199, 0.06); border: 1px dashed rgba(2, 132, 199, 0.4); border-radius: 8px; text-align: center;">
+          <input type="file" id="localAttachmentFileInput" accept=".pdf, .xlsx, .xls, .csv, .doc, .docx, .txt, .dwg, .ifc, .mindmap, .json" style="display: none;">
+          <input type="file" id="localAttachmentFolderInput" webkitdirectory directory multiple style="display: none;">
+          <div style="display: flex; gap: 8px; flex-direction: column;">
+            <button type="button" id="btnBrowseLocalAttachment" class="btn btn-accent" style="width: 100%; justify-content: center; gap: 8px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              📄 Cargar Archivo o Sub-Mapa (.mindmap.json)
+            </button>
+            <button type="button" id="btnBrowseLocalFolder" class="btn" style="width: 100%; justify-content: center; gap: 8px; background: #0284c7; color: #ffffff;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>
+              📁 Adjuntar Carpeta Local Completa...
+            </button>
+          </div>
+          <span style="font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 6px;">Soporta carpetas locales completas, archivos .pdf, .xlsx, .ifc y sub-mapas .mindmap.json</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nombre del archivo o sub-mapa / carpeta:</label>
+          <input type="text" id="attachNameInput" class="form-input" placeholder="ej. Carpeta_Disenos_2026 o Documento.pdf">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ruta local vinculada:</label>
+          <input type="text" id="attachPathInput" class="form-input" placeholder="ej. G:/Mi unidad/00_PLANEACIÓN BIM/docs/">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de elemento:</label>
+          <select id="attachTypeSelect" class="form-select">
+            <option value="folder">📁 Carpeta / Directorio de Archivos</option>
+            <option value="mindmap">🔗 Hipervínculo a Sub-Mapa EDT (.mindmap.json - Desglose)</option>
+            <option value="pdf">Documento PDF (.pdf)</option>
+            <option value="xlsx">Hoja de Cálculo Excel (.xlsx / .xls)</option>
+            <option value="ifc">Modelo BIM (.ifc)</option>
+            <option value="doc">Documento Word / Texto (.doc / .docx / .txt)</option>
+            <option value="dwg">Plano CAD (.dwg / .dxf)</option>
+            <option value="other">Otro archivo</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelAttachModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnSaveAttachment">Vincular y Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING CONTEXT MENU -->
+  <div id="nodeContextMenu" class="context-menu-floating" style="display: none;">
+    <div class="context-menu-header">
+      <span id="ctxMenuNodeTitle" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Nodo</span>
+      <span id="ctxMenuNodeCode" style="font-family: monospace; font-size: 11px;">01.01</span>
+    </div>
+    <button class="context-menu-btn" id="ctxBtnAddChild">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      + Agregar Dependencia / Hijo
+      <span class="context-menu-shortcut">Tab</span>
+    </button>
+    <button class="context-menu-btn" id="ctxBtnAddSibling">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      + Agregar Hermano
+      <span class="context-menu-shortcut">Enter</span>
+    </button>
+    <button class="context-menu-btn" id="ctxBtnAddTask" style="color: #0d9488;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      📋 Agregar Tarea
+    </button>
+    <button class="context-menu-btn" id="ctxBtnOpenAttachment" style="color: var(--accent-blue);">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      👁️ Abrir Archivo Adjunto
+    </button>
+    <button class="context-menu-btn" id="ctxBtnLinkSubmap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      🔗 Desglosar / Vincular Sub-mapa EDT
+    </button>
+    <button class="context-menu-btn" id="ctxBtnToggleCollapse">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+      <span id="ctxCollapseText">Colapsar / Expandir Rama (Agrupar)</span>
+    </button>
+    <button class="context-menu-btn" id="ctxBtnEdit">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Editar Propiedades & EDT
+    </button>
+    <button class="context-menu-btn" id="ctxBtnFocus">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Enfocar Rama
+    </button>
+    <button class="context-menu-btn danger" id="ctxBtnDelete">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Eliminar Rama
+    </button>
+  </div>
+
+  <!-- MODAL: ADD/EDIT DEPENDENCY DIALOG (LOGICAL NUMBERING ENGINE) -->
+  <div class="modal-backdrop" id="dependencyModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="depModalHeaderTitle">➕ Nueva Dependencia Jerárquica EDT</h2>
+        <button class="modal-close" id="btnCloseDepModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 6px; padding: 10px; font-size: 11.5px; color: #0369a1;">
+          <span>Nodo Superior / Padre: <b id="depModalParentName">Gerencia Técnica (01)</b></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Código Jerárquico Propuesto (EDT):</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="depCodeInput" class="form-input" style="font-weight: 700; font-family: monospace; color: var(--accent-blue);" placeholder="ej. 01.01.08">
+            <button id="btnRegenerateCode" class="btn" title="Recalcular numeración automática">🔄 Sugerir</button>
+          </div>
+          <span style="font-size: 10.5px; color: var(--text-muted);">Calculado lógicamente a partir de la jerarquía existente. Puedes ajustarlo.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nombre de la Actividad / Cargo / Dependencia:</label>
+          <input type="text" id="depTitleInput" class="form-input" placeholder="ej. Control de Calidad y Ensayos" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Responsable / Encargado (Opcional):</label>
+          <input type="text" id="depOwnerInput" class="form-input" placeholder="ej. Ing. Especialista">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo de Relación:</label>
+          <select id="depRelationSelect" class="form-select">
+            <option value="solid">Línea Sólida (Mando / Jerarquía Directa)</option>
+            <option value="dotted">Línea Punteada (Asesoría / Staff / Auditoría)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelDepModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmDepModal">Confirmar y Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT TASK DIALOG (Cuadro de diálogo de Tareas) -->
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="taskModalHeaderTitle">📋 Agregar Tarea al Nodo EDT</h2>
+        <button class="modal-close" id="btnCloseTaskModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.3); border-radius: 6px; padding: 10px; font-size: 11.5px; color: #0f766e; margin-bottom: 12px;">
+          <span>Nodo EDT Asociado: <b id="taskModalNodeContext">-</b></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="taskNameInput">Nombre de la Tarea: *</label>
+          <input type="text" id="taskNameInput" class="form-input" placeholder="ej. Revisión de modelo IFC estructural..." required autofocus>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="taskStartDateInput">Fecha de Inicio:</label>
+            <input type="date" id="taskStartDateInput" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="taskEndDateInput">Fecha de Fin:</label>
+            <input type="date" id="taskEndDateInput" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="taskStatusSelect">Estado:</label>
+          <select id="taskStatusSelect" class="form-select">
+            <option value="No iniciada">⚪ No iniciada</option>
+            <option value="En curso">🔵 En curso</option>
+            <option value="En revisión">🟡 En revisión</option>
+            <option value="Completada">🟢 Completada</option>
+            <option value="Bloqueada">🔴 Bloqueada</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelTaskModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnSaveTask">💾 Guardar Tarea</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden File Input for .json / .mindmap import -->
+  <input type="file" id="jsonFileInput" accept=".json, .mindmap" style="display: none;">
+
+  <!-- Main Application Logic Script -->
+  <script src="mindmap.js"></script>
+</body>
+</html>

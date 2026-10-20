@@ -1,0 +1,14 @@
+{
+  "name": "empresa-cde-gdrive-proxy",
+  "version": "1.0.0",
+  "description": "Módulo CDE para Empresa - Proxy Google Drive",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
